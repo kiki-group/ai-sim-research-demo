@@ -94,7 +94,8 @@ export function Settings() {
               {GEMINI_MODEL}
             </code>
             <p className="text-xs muted">
-              Gemini 3 Flash — the flagship low-latency reasoning model.
+              Gemini 3.1 Pro — the current flagship reasoning model in the
+              Gemini 3 class.
             </p>
           </div>
         </section>

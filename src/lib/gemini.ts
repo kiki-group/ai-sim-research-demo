@@ -8,6 +8,40 @@ export class GeminiError extends Error {
   }
 }
 
+/**
+ * Normalize an unknown error coming from the Gemini SDK / fetch into a
+ * short human-readable string. Gemini returns structured JSON errors like
+ * `{"error":{"code":400,"message":"...","status":"INVALID_ARGUMENT"}}`
+ * that we want to surface as "400 INVALID_ARGUMENT: …".
+ */
+function humanizeError(e: unknown): string {
+  if (!e) return "Unknown error.";
+  if (typeof e === "string") return parseMaybeJsonError(e);
+  const any = e as any;
+  const raw = any?.message ?? any?.error?.message ?? String(e);
+  return parseMaybeJsonError(raw);
+}
+
+function parseMaybeJsonError(raw: string): string {
+  const trimmed = String(raw).trim();
+  if (trimmed.startsWith("{")) {
+    try {
+      const obj = JSON.parse(trimmed);
+      const err = obj.error ?? obj;
+      const parts = [
+        err.code && String(err.code),
+        err.status,
+      ].filter(Boolean);
+      const head = parts.join(" ");
+      const msg = err.message ?? trimmed;
+      return head ? `${head}: ${msg}` : msg;
+    } catch {
+      /* fall through */
+    }
+  }
+  return trimmed;
+}
+
 function getClient(): { client: GoogleGenAI; model: string } {
   const { apiKey } = useStore.getState();
   if (!apiKey) throw new GeminiError("Missing Gemini API key.");
@@ -35,8 +69,8 @@ export async function validateApiKey(
     const text = res.text ?? "";
     if (!text) return { ok: false, error: "Empty response from Gemini." };
     return { ok: true };
-  } catch (e: any) {
-    return { ok: false, error: e?.message ?? "Validation failed." };
+  } catch (e) {
+    return { ok: false, error: humanizeError(e) };
   }
 }
 
@@ -45,15 +79,19 @@ export async function generateText(
   opts: { system?: string; temperature?: number } = {}
 ): Promise<string> {
   const { client, model } = getClient();
-  const res = await client.models.generateContent({
-    model,
-    contents: prompt,
-    config: {
-      systemInstruction: opts.system,
-      temperature: opts.temperature ?? 0.8,
-    },
-  });
-  return res.text ?? "";
+  try {
+    const res = await client.models.generateContent({
+      model,
+      contents: prompt,
+      config: {
+        systemInstruction: opts.system,
+        temperature: opts.temperature ?? 0.8,
+      },
+    });
+    return res.text ?? "";
+  } catch (e) {
+    throw new GeminiError(humanizeError(e), e);
+  }
 }
 
 export async function generateStructured<T>(
@@ -62,16 +100,24 @@ export async function generateStructured<T>(
   opts: { system?: string; temperature?: number } = {}
 ): Promise<T> {
   const { client, model } = getClient();
-  const res = await client.models.generateContent({
-    model,
-    contents: prompt,
-    config: {
-      systemInstruction: opts.system,
-      temperature: opts.temperature ?? 0.8,
-      responseMimeType: "application/json",
-      responseSchema: schema,
-    },
-  });
+  let res;
+  try {
+    res = await client.models.generateContent({
+      model,
+      contents: prompt,
+      config: {
+        systemInstruction: opts.system,
+        temperature: opts.temperature ?? 0.8,
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      },
+    });
+  } catch (e) {
+    // Log raw error for debugging while surfacing a friendlier message.
+    // eslint-disable-next-line no-console
+    console.error("[Gemini] generateStructured failed", e);
+    throw new GeminiError(humanizeError(e), e);
+  }
   const text = (res.text ?? "").trim();
   if (!text) throw new GeminiError("Empty response from Gemini.");
   try {

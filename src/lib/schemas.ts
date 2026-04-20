@@ -64,8 +64,8 @@ export const archetypesSchema = {
   properties: {
     archetypes: {
       type: Type.ARRAY,
-      minItems: 12,
-      maxItems: 12,
+      // Target 12 archetypes; enforced via prompt + client-side truncation.
+      // Strict min/max is too brittle across Gemini model versions.
       items: {
         type: Type.OBJECT,
         properties: {

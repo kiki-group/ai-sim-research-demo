@@ -2,8 +2,14 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ActionRun, Group, Report } from "../lib/types";
 
-/** Model is fixed for the demo; switch here to change everywhere. */
-export const GEMINI_MODEL = "gemini-3-flash-preview";
+/**
+ * Model is fixed for the demo; switch here to change everywhere.
+ *
+ * gemini-3.1-pro-preview is the current flagship Gemini 3-class model
+ * (gemini-3-pro-preview was deprecated 2026-03-09 and the 3 Flash
+ * preview has known structured-output compat issues on rich schemas).
+ */
+export const GEMINI_MODEL = "gemini-3.1-pro-preview";
 
 type State = {
   apiKey: string | null;

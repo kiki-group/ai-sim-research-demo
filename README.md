@@ -6,7 +6,7 @@ A mobile-first, static web app that lets you:
 2. **Ask the cohort questions** — open-ended, multiple-choice, or Likert — and get back a themed insight report with percentages, verbatim quotes, and follow-ups (not just binary yes/no).
 3. **Run mocked research actions** against the cohort: voice agent test, website usability test, concept / messaging test, A/B test, structured survey, and Van Westendorp pricing.
 
-Everything runs in the browser against Google Gemini (`gemini-3-flash-preview`) using **your own API key**. No backend, no OAuth, no accounts.
+Everything runs in the browser against Google Gemini (`gemini-3.1-pro-preview`) using **your own API key**. No backend, no OAuth, no accounts.
 
 ## Quick start
 
