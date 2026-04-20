@@ -51,7 +51,11 @@ function getClient(): { client: GoogleGenAI; model: string } {
   };
 }
 
-/** Validate the key by doing a minimal generation (one token). */
+/**
+ * Validate the key by doing a minimal generation. Thinking is disabled
+ * so the model doesn't burn our tiny maxOutputTokens budget on reasoning
+ * (a Gemini 3 pitfall — thinking is default-on for Pro).
+ */
 export async function validateApiKey(
   apiKey: string,
   model = GEMINI_MODEL
@@ -63,10 +67,11 @@ export async function validateApiKey(
       contents: "Reply with the word OK.",
       config: {
         temperature: 0,
-        maxOutputTokens: 8,
+        maxOutputTokens: 32,
+        thinkingConfig: { thinkingBudget: 0 },
       },
     });
-    const text = res.text ?? "";
+    const text = (res.text ?? "").trim();
     if (!text) return { ok: false, error: "Empty response from Gemini." };
     return { ok: true };
   } catch (e) {
@@ -86,6 +91,9 @@ export async function generateText(
       config: {
         systemInstruction: opts.system,
         temperature: opts.temperature ?? 0.8,
+        // Disable thinking: Pro is plenty capable for our tasks
+        // without it, and this keeps latency + token budgets tight.
+        thinkingConfig: { thinkingBudget: 0 },
       },
     });
     return res.text ?? "";
@@ -110,6 +118,9 @@ export async function generateStructured<T>(
         temperature: opts.temperature ?? 0.8,
         responseMimeType: "application/json",
         responseSchema: schema,
+        // Disable thinking — Gemini 3 Pro with thinking on can burn
+        // the output budget on reasoning and return empty visible text.
+        thinkingConfig: { thinkingBudget: 0 },
       },
     });
   } catch (e) {
@@ -119,7 +130,11 @@ export async function generateStructured<T>(
     throw new GeminiError(humanizeError(e), e);
   }
   const text = (res.text ?? "").trim();
-  if (!text) throw new GeminiError("Empty response from Gemini.");
+  if (!text) {
+    throw new GeminiError(
+      "Empty response from Gemini. The model may have hit a safety filter or rate limit — try again."
+    );
+  }
   try {
     return JSON.parse(text) as T;
   } catch (e) {
