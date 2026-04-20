@@ -106,7 +106,7 @@ export function ApiKeyGate() {
       </div>
 
       <footer className="py-4 text-center text-2xs muted">
-        Not affiliated with syntheticusers.com
+        A demo build for research experimentation.
       </footer>
     </div>
   );

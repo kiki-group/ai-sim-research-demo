@@ -60,4 +60,4 @@ Then drag the `dist/` folder into [Netlify Drop](https://app.netlify.com/drop) o
 
 ## License
 
-Vibe-coded demo for learning purposes. Not affiliated with syntheticusers.com.
+Vibe-coded demo for learning purposes.

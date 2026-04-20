@@ -132,7 +132,7 @@ export function Settings() {
         </section>
 
         <p className="text-2xs muted text-center py-4">
-          AI Simulated Research — demo. Not affiliated with syntheticusers.com.
+          AI Simulated Research — demo build.
         </p>
       </div>
     </div>
