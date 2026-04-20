@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# We use a HashRouter, so no SPA rewrite is needed. This fallback is
+# harmless and covers any future browser-router override.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

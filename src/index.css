@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f8fafc;
+  color: #0f172a;
+  overscroll-behavior-y: none;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #020617;
+    color: #e2e8f0;
+  }
+}
+
+@supports (font-variation-settings: normal) {
+  body {
+    font-family: "Inter var", "Inter", ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+@layer base {
+  h1, h2, h3, h4 {
+    letter-spacing: -0.01em;
+  }
+  h1 {
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  /* Surfaces */
+  .surface {
+    @apply bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800;
+  }
+  .card {
+    @apply surface rounded-xl;
+  }
+  .card-hover {
+    @apply card transition hover:border-ink-300 dark:hover:border-ink-700 hover:shadow-soft;
+  }
+
+  /* Buttons - no gradients, enterprise-friendly */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-ink-950;
+  }
+  .btn-sm {
+    @apply btn px-2.5 py-1.5 text-xs;
+  }
+  .btn-lg {
+    @apply btn px-5 py-3 text-[15px];
+  }
+  .btn-primary {
+    @apply btn bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+  }
+  .btn-primary-lg {
+    @apply btn-lg bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+  }
+  .btn-secondary {
+    @apply btn bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800 text-ink-800 dark:text-ink-100 hover:bg-ink-50 dark:hover:bg-ink-800;
+  }
+  .btn-ghost {
+    @apply btn text-ink-700 dark:text-ink-200 hover:bg-ink-100 dark:hover:bg-ink-800;
+  }
+  .btn-danger {
+    @apply btn text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full rounded-lg border border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900 px-3 py-2.5 text-[14px] text-ink-900 dark:text-ink-100 placeholder:text-ink-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition;
+  }
+  .textarea {
+    @apply input resize-none;
+  }
+
+  /* Chips / badges */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium bg-ink-100 dark:bg-ink-800 text-ink-700 dark:text-ink-200 border border-transparent;
+  }
+  .chip-outline {
+    @apply chip bg-transparent border-ink-200 dark:border-ink-800;
+  }
+  .chip-brand {
+    @apply chip bg-brand-50 dark:bg-brand-600/10 text-brand-700 dark:text-brand-200 border-brand-100 dark:border-brand-600/20;
+  }
+  .badge-success {
+    @apply chip bg-accent-500/10 text-accent-600 dark:text-accent-500 border-accent-500/20;
+  }
+  .badge-warn {
+    @apply chip bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20;
+  }
+  .badge-error {
+    @apply chip bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20;
+  }
+
+  /* Typography helpers */
+  .label {
+    @apply text-xs font-medium text-ink-500 dark:text-ink-400 uppercase tracking-wide;
+  }
+  .muted {
+    @apply text-ink-500 dark:text-ink-400;
+  }
+
+  /* Dividers */
+  .divider {
+    @apply border-t border-ink-200 dark:border-ink-800;
+  }
+}
+
+/* Pretty scrollbars on desktop */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.35);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.55);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-fade {
+  animation: fadeIn 160ms ease-out;
+}
+.animate-slide-up {
+  animation: slideUp 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Prose-ish cleanup for generated content */
+.prose-compact p + p {
+  margin-top: 0.75em;
+}
