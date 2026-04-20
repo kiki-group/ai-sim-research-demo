@@ -52,9 +52,11 @@ function getClient(): { client: GoogleGenAI; model: string } {
 }
 
 /**
- * Validate the key by doing a minimal generation. Thinking is disabled
- * so the model doesn't burn our tiny maxOutputTokens budget on reasoning
- * (a Gemini 3 pitfall — thinking is default-on for Pro).
+ * Validate the key by doing a minimal generation. Gemini 3 Pro requires
+ * thinking mode (thinkingBudget: 0 is rejected with
+ * "Budget 0 is invalid. This model only works in thinking mode."), so
+ * we leave thinking at its default and give maxOutputTokens enough
+ * headroom for reasoning tokens plus a short visible reply.
  */
 export async function validateApiKey(
   apiKey: string,
@@ -67,8 +69,7 @@ export async function validateApiKey(
       contents: "Reply with the word OK.",
       config: {
         temperature: 0,
-        maxOutputTokens: 32,
-        thinkingConfig: { thinkingBudget: 0 },
+        maxOutputTokens: 1024,
       },
     });
     const text = (res.text ?? "").trim();
@@ -91,9 +92,6 @@ export async function generateText(
       config: {
         systemInstruction: opts.system,
         temperature: opts.temperature ?? 0.8,
-        // Disable thinking: Pro is plenty capable for our tasks
-        // without it, and this keeps latency + token budgets tight.
-        thinkingConfig: { thinkingBudget: 0 },
       },
     });
     return res.text ?? "";
@@ -118,9 +116,6 @@ export async function generateStructured<T>(
         temperature: opts.temperature ?? 0.8,
         responseMimeType: "application/json",
         responseSchema: schema,
-        // Disable thinking — Gemini 3 Pro with thinking on can burn
-        // the output budget on reasoning and return empty visible text.
-        thinkingConfig: { thinkingBudget: 0 },
       },
     });
   } catch (e) {
